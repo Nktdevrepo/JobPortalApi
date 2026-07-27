@@ -1,7 +1,9 @@
 package com.eazybytes.jobportal.contact.service.impl;
 
+import com.eazybytes.jobportal.constants.ApplicationConstants;
 import com.eazybytes.jobportal.contact.service.IContactService;
 import com.eazybytes.jobportal.dto.ContactRequestDto;
+import com.eazybytes.jobportal.dto.ContactResponseDto;
 import com.eazybytes.jobportal.entity.Contact;
 import com.eazybytes.jobportal.repository.ContactRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +11,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,17 @@ public class ContactServiceImpl implements IContactService {
         }
         return result;
     }
+
+    @Override
+    public List<ContactResponseDto> fetchNewContactMsgs() {
+        List<Contact> contacts = contactRepository.findContactsByStatus
+                (ApplicationConstants.NEW_MESSAGE);
+        List<ContactResponseDto> responseDtos = contacts.stream()
+                .map(this::transformToDto)
+                .collect(Collectors.toList());
+        return responseDtos;
+    }
+
     private Contact transformToEntity(ContactRequestDto contactRequestDto) {
         Contact contact = new Contact();
         BeanUtils.copyProperties(contactRequestDto, contact);
@@ -32,5 +47,12 @@ public class ContactServiceImpl implements IContactService {
 //        contact.setCreatedBy("System");
         contact.setStatus("NEW");
         return contact;
+    }
+
+    private ContactResponseDto transformToDto(Contact contact) {
+        ContactResponseDto contactResponseDto = new ContactResponseDto(contact.getId(),
+                contact.getName(), contact.getEmail(), contact.getUserType(), contact.getSubject(),
+                contact.getMessage(), contact.getStatus(), contact.getCreatedAt());
+        return contactResponseDto;
     }
 }

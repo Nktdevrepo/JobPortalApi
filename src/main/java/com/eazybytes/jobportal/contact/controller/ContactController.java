@@ -2,6 +2,7 @@ package com.eazybytes.jobportal.contact.controller;
 
 import com.eazybytes.jobportal.contact.service.IContactService;
 import com.eazybytes.jobportal.dto.ContactRequestDto;
+import com.eazybytes.jobportal.dto.ContactResponseDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/contacts")
@@ -30,6 +33,11 @@ public class ContactController {
         }
 
 
+    }
+    @GetMapping("/admin")
+    public ResponseEntity<List<ContactResponseDto>> fetchNewContactMsgs() {
+        List<ContactResponseDto> contactResponseDtos = contactService.fetchNewContactMsgs();
+        return ResponseEntity.status(HttpStatus.OK).body(contactResponseDtos);
     }
 
 //    @GetMapping(version = "1.0")
