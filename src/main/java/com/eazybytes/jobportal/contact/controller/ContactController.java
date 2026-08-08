@@ -1,5 +1,6 @@
 package com.eazybytes.jobportal.contact.controller;
 
+import com.eazybytes.jobportal.constants.ApplicationConstants;
 import com.eazybytes.jobportal.contact.service.IContactService;
 import com.eazybytes.jobportal.dto.ContactRequestDto;
 import com.eazybytes.jobportal.dto.ContactResponseDto;
@@ -59,6 +60,16 @@ public class ContactController {
         Page<ContactResponseDto> contactResponseDtoPage = contactService
                 .fetchNewContactMsgsWithPaginationAndSort(pageNumber, pageSize, sortBy, sortDir);
         return ResponseEntity.status(HttpStatus.OK).body(contactResponseDtoPage);
+    }
+    @PatchMapping("/{id}/status/admin")
+    public ResponseEntity<String> closeContactMsg(@PathVariable String id) {
+        boolean isUpdated = contactService.closeContactMsg(Long.valueOf(id),
+                ApplicationConstants.CLOSED_MESSAGE);
+        if (isUpdated) {
+            return ResponseEntity.status(HttpStatus.OK).body("Contact message updated successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update contact message.");
+        }
     }
 //    @GetMapping(version = "1.0")
 //    public ResponseEntity<String> fetchOpenContacts(@RequestParam
