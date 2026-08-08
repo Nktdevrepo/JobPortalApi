@@ -8,6 +8,9 @@ import com.eazybytes.jobportal.entity.Contact;
 import com.eazybytes.jobportal.repository.ContactRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
@@ -53,6 +56,23 @@ public class ContactServiceImpl implements IContactService {
                 .map(this::transformToDto)
                 .collect(Collectors.toList());
         return responseDtos;
+    }
+
+    @Override
+    public Page<ContactResponseDto> fetchNewContactMsgsWithPaginationAndSort(int pageNumber, int pageSize, String sortBy, String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
+        // Fetch paginated and sorted contacts from repository
+        Page<Contact> contactPage = contactRepository.findContactsByStatus(
+                ApplicationConstants.NEW_MESSAGE, pageable);
+
+        // Transform Contact entities to ContactResponseDto
+        Page<ContactResponseDto> responseDtoPage = contactPage.map(this::transformToDto);
+        return responseDtoPage;
     }
 
     private Contact transformToEntity(ContactRequestDto contactRequestDto) {
