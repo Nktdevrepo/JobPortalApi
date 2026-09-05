@@ -10,6 +10,7 @@ import com.eazybytes.jobportal.service.ICompanyService;
 //import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class CompanyServiceImpl implements ICompanyService {
 //        this.companyRepository = companyRepository;
 //    }
 
+
     @Override
     public List<CompanyDto> getAllCompanies() {
         List<Company> companyList = companyRepository.fetchCompaniesWithJobsByStatus(ApplicationConstants.ACTIVE_STATUS);
@@ -41,6 +43,7 @@ public class CompanyServiceImpl implements ICompanyService {
         return savedCompany.getId() != null && savedCompany.getId() > 0;
     }
 
+    @Cacheable("companies")
     @Override
     public List<CompanyDto> getAllCompaniesForAdmin() {
         List<Company> companyList = companyRepository.findAll();
