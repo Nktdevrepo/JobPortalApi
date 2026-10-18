@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -96,6 +97,27 @@ public class UserController {
         return new ResponseEntity<>(resume, headers, HttpStatus.OK);
     }
 
+    @PostMapping(value = "/saved-jobs/{jobId}/jobseeker", version = "1.0")
+    public ResponseEntity<JobDto> saveJob(@PathVariable Long jobId,
+                                          Authentication authentication) {
+        String userEmail = authentication.getName();
+        JobDto savedJob = userService.saveJob(userEmail, jobId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedJob);
+    }
 
+    @DeleteMapping(value = "/saved-jobs/{jobId}/jobseeker", version = "1.0")
+    public ResponseEntity<String> unsaveJob(@PathVariable Long jobId,
+                                            Authentication authentication) {
+        String userEmail = authentication.getName();
+        userService.unsaveJob(userEmail, jobId);
+        return ResponseEntity.status(HttpStatus.OK).body("Job unsaved successfully");
+    }
+
+    @GetMapping(value = "/saved-jobs/jobseeker", version = "1.0")
+    public ResponseEntity<List<JobDto>> getSavedJobs(Authentication authentication) {
+        String userEmail = authentication.getName();
+        List<JobDto> savedJobDtos = userService.getSavedJobs(userEmail);
+        return ResponseEntity.ok(savedJobDtos);
+    }
 
 }

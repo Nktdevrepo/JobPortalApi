@@ -1,14 +1,13 @@
 package com.eazybytes.jobportal.user.service.impl;
 
 import com.eazybytes.jobportal.constants.ApplicationConstants;
+import com.eazybytes.jobportal.dto.JobDto;
 import com.eazybytes.jobportal.dto.ProfileDto;
 import com.eazybytes.jobportal.dto.UserDto;
-import com.eazybytes.jobportal.entity.Company;
-import com.eazybytes.jobportal.entity.JobPortalUser;
-import com.eazybytes.jobportal.entity.Profile;
-import com.eazybytes.jobportal.entity.Role;
+import com.eazybytes.jobportal.entity.*;
 import com.eazybytes.jobportal.repository.*;
 import com.eazybytes.jobportal.user.service.IUserService;
+import com.eazybytes.jobportal.util.ApplicationUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -130,6 +131,41 @@ public class UserServiceImpl implements IUserService {
             return null;
         }
         return mapToProfileDto(user.getProfile(), true);
+    }
+
+    @Transactional
+    @Override
+    public JobDto saveJob(String userEmail, Long jobId) {
+        // Validate if user exists
+        JobPortalUser user = userRepository.findJobPortalUserByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+        // Validate job exists
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found with ID: " + jobId));
+        user.getSavedJobs().add(job);
+        // userRepository.save(user);
+        return ApplicationUtility.transformJobToDto(job);
+    }
+
+    @Transactional
+    @Override
+    public void unsaveJob(String userEmail, Long jobId) {
+        // Validate if user exists
+        JobPortalUser user = userRepository.findJobPortalUserByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+        // Validate job exists
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found with ID: " + jobId));
+        user.getSavedJobs().remove(job);
+    }
+
+    @Override
+    public List<JobDto> getSavedJobs(String userEmail) {
+        // Validate if user exists
+        JobPortalUser user = userRepository.findJobPortalUserByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+        return user.getSavedJobs().stream().map(job -> ApplicationUtility.transformJobToDto(job))
+                .collect(Collectors.toList());
     }
 
 
